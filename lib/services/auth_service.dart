@@ -1,0 +1,43 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthService {
+  final _supabase = Supabase.instance.client;
+
+  // FR-001: Login [cite: 45, 46]
+  Future<AuthResponse> signIn(String email, String password) async {
+    return await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  // FR-003: Register [cite: 50, 51]
+  Future<AuthResponse> signUp(String email, String password, String name, String role) async {
+    final response = await _supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: {'full_name': name, 'role': role},
+    );
+
+    final signedUpUser = response.user;
+    if (signedUpUser != null) {
+      await _supabase.from('profiles').upsert({
+        'id': signedUpUser.id,
+        'full_name': name,
+        'role': role,
+      });
+    }
+
+    return response;
+  }
+
+  // FR-004: Reset Password [cite: 52]
+  Future<void> resetPassword(String email) async {
+    await _supabase.auth.resetPasswordForEmail(email);
+  }
+
+  // FR-002: Logout [cite: 47]
+  Future<void> signOut() async {
+    await _supabase.auth.signOut();
+  }
+}
