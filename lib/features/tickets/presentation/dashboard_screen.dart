@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_controller.dart';
-import '../../../models/profile_model.dart';
+import '../../../core/permissions.dart';
 import '../../../models/ticket_model.dart';
 import 'create_ticket_screen.dart';
 import 'history_screen.dart';
@@ -47,7 +47,7 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            if (user.role == UserRole.user)
+            if (PermissionGuard.hasPermission(user.role, AppPermission.createTicket))
               Expanded(
                 child: FilledButton.icon(
                   onPressed: () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_controller.dart';
+import '../../../core/permissions.dart';
 import '../../../models/profile_model.dart';
 import '../../auth/presentation/profile_screen.dart';
 import '../../tickets/presentation/create_ticket_screen.dart';
@@ -64,7 +65,8 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
         ],
       ),
       body: pages[_index],
-      floatingActionButton: _index == 1 && user.role == UserRole.user
+            floatingActionButton: _index == 1 &&
+              PermissionGuard.hasPermission(user.role, AppPermission.createTicket)
           ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(

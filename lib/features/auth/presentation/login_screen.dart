@@ -40,11 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final quickAccounts = <Map<String, String>>[
-      {'role': 'User', 'email': 'user@helpdesk.app'},
-      {'role': 'Helpdesk', 'email': 'helpdesk@helpdesk.app'},
-      {'role': 'Admin', 'email': 'admin@helpdesk.app'},
-    ];
+    final errorMessage = ref.watch(appControllerProvider).lastError;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Login E-Ticketing')),
@@ -52,25 +48,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
-            const Text(
-              'Gunakan akun demo (password: 123456) atau login dengan akun terdaftar.',
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: quickAccounts
-                  .map(
-                    (account) => ActionChip(
-                      label: Text(account['role']!),
-                      onPressed: () {
-                        _emailController.text = account['email']!;
-                        _passwordController.text = '123456';
-                        setState(() {});
-                      },
-                    ),
-                  )
-                  .toList(),
-            ),
+            const Text('Masuk menggunakan akun backend Supabase yang sudah terdaftar.'),
+            if (errorMessage != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                errorMessage,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,

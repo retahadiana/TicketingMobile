@@ -35,6 +35,23 @@ TicketStatus statusFromString(String rawStatus) {
   }
 }
 
+DateTime parseDate(dynamic raw) {
+  if (raw is String) {
+    return DateTime.tryParse(raw) ?? DateTime.now();
+  }
+  return DateTime.now();
+}
+
+String parseString(dynamic value, {String fallback = ''}) {
+  if (value is String) {
+    return value;
+  }
+  if (value != null) {
+    return value.toString();
+  }
+  return fallback;
+}
+
 class TicketComment {
   final String id;
   final String ticketId;
@@ -53,6 +70,18 @@ class TicketComment {
     required this.message,
     required this.createdAt,
   });
+
+  factory TicketComment.fromJson(Map<String, dynamic> json) {
+    return TicketComment(
+      id: parseString(json['id']),
+      ticketId: parseString(json['ticket_id']),
+      authorId: parseString(json['author_id']),
+      authorName: parseString(json['author_name'], fallback: 'Unknown'),
+      authorRole: roleFromString(parseString(json['author_role'], fallback: 'User')),
+      message: parseString(json['message'], fallback: '-'),
+      createdAt: parseDate(json['created_at']),
+    );
+  }
 }
 
 class TicketTrackingEvent {
@@ -69,6 +98,16 @@ class TicketTrackingEvent {
     required this.message,
     required this.createdAt,
   });
+
+  factory TicketTrackingEvent.fromJson(Map<String, dynamic> json) {
+    return TicketTrackingEvent(
+      id: parseString(json['id']),
+      ticketId: parseString(json['ticket_id']),
+      actorName: parseString(json['actor_name'], fallback: 'System'),
+      message: parseString(json['message'], fallback: '-'),
+      createdAt: parseDate(json['created_at']),
+    );
+  }
 }
 
 class TicketNotification {
@@ -102,6 +141,19 @@ class TicketNotification {
       targetRole: targetRole,
       targetUserId: targetUserId,
       isRead: isRead ?? this.isRead,
+    );
+  }
+
+  factory TicketNotification.fromJson(Map<String, dynamic> json) {
+    return TicketNotification(
+      id: parseString(json['id']),
+      title: parseString(json['title'], fallback: '-'),
+      message: parseString(json['message'], fallback: '-'),
+      ticketId: parseString(json['ticket_id']),
+      createdAt: parseDate(json['created_at']),
+      targetRole: roleFromString(parseString(json['target_role'], fallback: 'User')),
+      targetUserId: json['target_user_id'] as String?,
+      isRead: (json['is_read'] as bool?) ?? false,
     );
   }
 }
@@ -171,17 +223,17 @@ class Ticket {
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
-      id: (json['id'] as String?) ?? '',
-      userId: (json['user_id'] as String?) ?? '',
-      userName: (json['user_name'] as String?) ?? 'User',
-      title: (json['title'] as String?) ?? '-',
-      description: (json['description'] as String?) ?? '-',
-      status: statusFromString((json['status'] as String?) ?? 'Open'),
+      id: parseString(json['id']),
+      userId: parseString(json['user_id']),
+      userName: parseString(json['user_name'], fallback: 'User'),
+      title: parseString(json['title'], fallback: '-'),
+      description: parseString(json['description'], fallback: '-'),
+      status: statusFromString(parseString(json['status'], fallback: 'Open')),
       priority: json['priority'] as String?,
       imageUrl: json['image_url'] as String?,
       assignedTo: json['assigned_to'] as String?,
-      createdAt: DateTime.tryParse((json['created_at'] as String?) ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse((json['updated_at'] as String?) ?? '') ?? DateTime.now(),
+      createdAt: parseDate(json['created_at']),
+      updatedAt: parseDate(json['updated_at']),
     );
   }
 }

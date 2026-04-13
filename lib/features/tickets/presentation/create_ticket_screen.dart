@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,13 +15,18 @@ class CreateTicketScreen extends ConsumerStatefulWidget {
 class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  File? _image;
+  XFile? _image;
+  Uint8List? _imageBytes;
   bool _isLoading = false;
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
-      setState(() => _image = File(pickedFile.path));
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _image = pickedFile;
+        _imageBytes = bytes;
+      });
     }
   }
 
@@ -40,6 +45,8 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
         title: _titleController.text,
         description: _descController.text,
         imagePath: _image?.path,
+        imageBytes: _imageBytes,
+        imageFileName: _image?.name,
       );
 
       if (mounted) {
@@ -78,8 +85,8 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
               decoration: const InputDecoration(labelText: 'Deskripsi'),
             ),
             const SizedBox(height: 16),
-            _image != null
-                ? Image.file(_image!, height: 200)
+            _imageBytes != null
+              ? Image.memory(_imageBytes!, height: 200)
                 : const Text('Belum ada gambar terpilih'),
 
             const SizedBox(height: 16),

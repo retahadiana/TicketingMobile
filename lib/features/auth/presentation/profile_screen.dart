@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_controller.dart';
+import '../../../core/permissions.dart';
 import '../../../models/profile_model.dart';
 import '../../tickets/presentation/history_screen.dart';
+import 'role_provisioning_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -35,6 +37,22 @@ class ProfileScreen extends ConsumerWidget {
             },
           ),
         ),
+        if (PermissionGuard.hasPermission(profile.role, AppPermission.manageUserRoles))
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text('Provisioning Role User'),
+              subtitle: const Text('Atur role User/Helpdesk/Admin'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RoleProvisioningScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
         Card(
           child: ListTile(
             leading: const Icon(Icons.dark_mode),

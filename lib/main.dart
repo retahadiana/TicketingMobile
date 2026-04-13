@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/register_screen.dart';
@@ -8,7 +9,21 @@ import 'features/auth/presentation/splash_screen.dart';
 import 'features/home/presentation/home_shell_screen.dart';
 import 'core/app_controller.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://kzkxgjvdcybhbtqqubon.supabase.co',
+  );
+  const supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6a3hnanZkY3liaGJ0cXF1Ym9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NTgxMDIsImV4cCI6MjA5MTQzNDEwMn0.QhxJ_ZriyXKCuUQ_I2ndZBUo3DX8ggWEtQ-8q-5P4jU',
+  );
+
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
