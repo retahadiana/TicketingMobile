@@ -19,22 +19,55 @@ class ProfileScreen extends ConsumerWidget {
       return const Center(child: Text('Tidak ada profil aktif.'));
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: <Widget>[
-        _ProfileHeader(profile: profile),
+        TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 450),
+          tween: Tween(begin: 0, end: 1),
+          builder: (context, value, child) => Opacity(
+            opacity: value,
+            child: Transform.translate(offset: Offset(0, (1 - value) * 10), child: child),
+          ),
+          child: _ProfileHeader(profile: profile),
+        ),
         const SizedBox(height: 16),
         Card(
-          child: ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text('Riwayat & Tracking'),
-            subtitle: const Text('Lihat histori aktivitas tiket'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(builder: (_) => const HistoryScreen()),
-              );
-            },
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('Riwayat & Tracking'),
+                subtitle: const Text('Lihat histori aktivitas tiket'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const HistoryScreen()),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.dark_mode),
+                title: const Text('Dark Mode'),
+                subtitle: Text(
+                  controller.themeMode == ThemeMode.dark
+                      ? 'Tampilan gelap aktif'
+                      : 'Tampilan terang aktif',
+                ),
+                trailing: Switch(
+                  value: controller.themeMode == ThemeMode.dark,
+                  onChanged: (value) {
+                    ref
+                        .read(appControllerProvider)
+                        .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         if (PermissionGuard.hasPermission(profile.role, AppPermission.manageUserRoles))
@@ -43,6 +76,7 @@ class ProfileScreen extends ConsumerWidget {
               leading: const Icon(Icons.admin_panel_settings),
               title: const Text('Provisioning Role User'),
               subtitle: const Text('Atur role User/Helpdesk/Admin'),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.push(
                   context,
@@ -53,22 +87,12 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
           ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.dark_mode),
-            title: const Text('Dark Mode'),
-            trailing: Switch(
-              value: controller.themeMode == ThemeMode.dark,
-              onChanged: (value) {
-                ref
-                    .read(appControllerProvider)
-                    .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-              },
-            ),
-          ),
-        ),
         const SizedBox(height: 12),
         FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: colorScheme.errorContainer,
+            foregroundColor: colorScheme.onErrorContainer,
+          ),
           onPressed: () async {
             await ref.read(appControllerProvider).logout();
             if (context.mounted) {
@@ -90,6 +114,8 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -100,6 +126,7 @@ class _ProfileHeader extends StatelessWidget {
               children: <Widget>[
                 CircleAvatar(
                   radius: 26,
+                  backgroundColor: colorScheme.primaryContainer,
                   child: Text(profile.fullName.substring(0, 1).toUpperCase()),
                 ),
                 const SizedBox(width: 12),
@@ -116,7 +143,14 @@ class _ProfileHeader extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            Text('Role: ${profile.role.value}'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text('Role: ${profile.role.value}'),
+            ),
           ],
         ),
       ),

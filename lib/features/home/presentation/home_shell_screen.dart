@@ -50,7 +50,16 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${titles[_index]} • ${user.role.value}'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(titles[_index]),
+            Text(
+              user.role.value,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
         actions: <Widget>[
           IconButton(
             tooltip: 'Logout',
@@ -67,7 +76,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
       body: pages[_index],
             floatingActionButton: _index == 1 &&
               PermissionGuard.hasPermission(user.role, AppPermission.createTicket)
-          ? FloatingActionButton.extended(
+                ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -76,6 +85,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
               },
               icon: const Icon(Icons.add),
               label: const Text('Create Ticket'),
+                    elevation: 0,
             )
           : null,
       bottomNavigationBar: NavigationBar(

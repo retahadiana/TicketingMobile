@@ -45,27 +45,36 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Reset Password')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Masukkan email terdaftar untuk reset password.'),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            _isSending
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _sendResetEmail,
-                    child: const Text('Kirim Reset Password'),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Pulihkan akun Anda', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 6),
+                  const Text('Masukkan email terdaftar untuk menerima tautan reset password.'),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-          ],
-        ),
+                  const SizedBox(height: 14),
+                  _isSending
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _sendResetEmail,
+                          child: const Text('Kirim Reset Password'),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

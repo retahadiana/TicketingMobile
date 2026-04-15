@@ -32,11 +32,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     try {
       await ref.read(appControllerProvider).register(
-            fullName: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
         role: _selectedRole,
-          );
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,54 +61,64 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Daftar Akun')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: ListView(
-          children: [
-            const Text('Pilih role akun saat registrasi.'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nama Lengkap'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<UserRole>(
-              initialValue: _selectedRole,
-              decoration: const InputDecoration(labelText: 'Role'),
-              items: UserRole.values
-                  .map(
-                    (role) => DropdownMenuItem<UserRole>(
-                      value: role,
-                      child: Text(role.value),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedRole = value);
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _handleRegister,
-                    child: const Text('Register'),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Buat akun baru', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 6),
+                  const Text('Pilih role akun saat registrasi.'),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: 'Nama Lengkap'),
                   ),
-          ],
-        ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<UserRole>(
+                    initialValue: _selectedRole,
+                    decoration: const InputDecoration(labelText: 'Role'),
+                    items: UserRole.values
+                        .map(
+                          (role) => DropdownMenuItem<UserRole>(
+                            value: role,
+                            child: Text(role.value),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedRole = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _handleRegister,
+                          child: const Text('Register'),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

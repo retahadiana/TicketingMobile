@@ -41,45 +41,102 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final errorMessage = ref.watch(appControllerProvider).lastError;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login E-Ticketing')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: SafeArea(
         child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            const Text('Masuk menggunakan akun backend Supabase yang sudah terdaftar.'),
-            if (errorMessage != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                errorMessage,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  colors: <Color>[
+                    colorScheme.primary,
+                    colorScheme.primary.withValues(alpha: 0.75),
+                  ],
+                ),
               ),
-            ],
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _handleLogin,
-                    child: const Text('Login'),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(Icons.support_agent, color: Colors.white, size: 34),
+                  SizedBox(height: 10),
+                  Text(
+                    'Welcome Back',
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
                   ),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/reset-password'),
-              child: const Text('Lupa password?'),
+                  SizedBox(height: 6),
+                  Text(
+                    'Masuk untuk melanjutkan monitoring dan pengelolaan tiket.',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/register'),
-              child: const Text('Belum punya akun? Register'),
+            const SizedBox(height: 14),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Login E-Ticketing', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 6),
+                    const Text('Masuk menggunakan akun backend Supabase yang sudah terdaftar.'),
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          errorMessage,
+                          style: TextStyle(color: colorScheme.onErrorContainer),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(labelText: 'Password'),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 14),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _handleLogin,
+                            child: const Text('Login'),
+                          ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/reset-password'),
+                        child: const Text('Lupa password?'),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/register'),
+                        child: const Text('Belum punya akun? Register'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

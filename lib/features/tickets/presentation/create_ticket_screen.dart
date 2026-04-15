@@ -68,49 +68,137 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Ticket')),
+      appBar: AppBar(title: const Text('Buat Tiket Baru')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Judul Masalah'),
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 500),
+              tween: Tween(begin: 0, end: 1),
+              builder: (context, value, child) => Opacity(
+                opacity: value,
+                child: Transform.translate(offset: Offset(0, (1 - value) * 12), child: child),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.secondaryContainer,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.confirmation_num_outlined),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Lengkapi detail kendala agar tim support bisa menangani lebih cepat.',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _descController,
-              maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Deskripsi'),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(labelText: 'Judul Masalah'),
+                    ),
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: _descController,
+                      maxLines: 4,
+                      decoration: const InputDecoration(labelText: 'Deskripsi Detail'),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
-            _imageBytes != null
-              ? Image.memory(_imageBytes!, height: 200)
-                : const Text('Belum ada gambar terpilih'),
-
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    icon: const Icon(Icons.camera_alt), label: const Text('Kamera')
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.attachment, color: colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Text('Lampiran', style: Theme.of(context).textTheme.titleMedium),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      child: _imageBytes != null
+                          ? ClipRRect(
+                              key: const ValueKey('ticket-image-preview'),
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.memory(
+                                _imageBytes!,
+                                height: 210,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Container(
+                              key: const ValueKey('ticket-image-empty'),
+                              height: 140,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: colorScheme.outlineVariant),
+                                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                              ),
+                              child: const Text('Belum ada gambar terpilih'),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _pickImage(ImageSource.camera),
+                            icon: const Icon(Icons.camera_alt),
+                            label: const Text('Kamera'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _pickImage(ImageSource.gallery),
+                            icon: const Icon(Icons.photo),
+                            label: const Text('Galeri'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                ElevatedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    icon: const Icon(Icons.photo), label: const Text('Galeri')
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 32),
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                onPressed: _submitTicket,
-                style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
-                child: const Text('Kirim Laporan')
-            ),
+                    onPressed: _submitTicket,
+                    style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                    child: const Text('Kirim Laporan'),
+                  ),
           ],
         ),
       ),

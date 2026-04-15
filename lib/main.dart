@@ -8,6 +8,7 @@ import 'features/auth/presentation/reset_password_screen.dart';
 import 'features/auth/presentation/splash_screen.dart';
 import 'features/home/presentation/home_shell_screen.dart';
 import 'core/app_controller.dart';
+import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,16 +38,8 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'E-Ticketing Helpdesk',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        colorSchemeSeed: const Color(0xFF0A9396),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorSchemeSeed: const Color(0xFF0A9396),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       themeMode: appController.themeMode,
       initialRoute: '/',
       routes: {

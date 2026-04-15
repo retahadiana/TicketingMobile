@@ -21,6 +21,11 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
   TicketStatus? _selectedStatus;
   bool _isBusy = false;
 
+  String _formatDate(DateTime raw) {
+    final dt = raw.toLocal();
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
   bool _isSupport(Profile? profile) {
     if (profile == null) {
       return false;
@@ -48,12 +53,21 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     }
 
     setState(() => _isBusy = true);
-    await ref
-        .read(appControllerProvider)
-        .addComment(ticketId: widget.ticketId, message: message);
-    _commentController.clear();
-    if (mounted) {
-      setState(() => _isBusy = false);
+    try {
+      await ref
+          .read(appControllerProvider)
+          .addComment(ticketId: widget.ticketId, message: message);
+      _commentController.clear();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengirim komentar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isBusy = false);
+      }
     }
   }
 
@@ -65,23 +79,34 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
 
     setState(() => _isBusy = true);
 
-    await ref.read(appControllerProvider).updateTicketStatus(
-          ticketId: widget.ticketId,
-          newStatus: selectedStatus,
+    try {
+      await ref.read(appControllerProvider).updateTicketStatus(
+            ticketId: widget.ticketId,
+            newStatus: selectedStatus,
+          );
+
+      final assignee = _assignedController.text.trim();
+      if (assignee.isNotEmpty) {
+        await ref
+            .read(appControllerProvider)
+            .assignTicket(ticketId: widget.ticketId, assigneeName: assignee);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Perubahan tiket berhasil disimpan.')),
         );
-
-    final assignee = _assignedController.text.trim();
-    if (assignee.isNotEmpty) {
-      await ref
-          .read(appControllerProvider)
-          .assignTicket(ticketId: widget.ticketId, assigneeName: assignee);
-    }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Perubahan tiket berhasil disimpan.')),
-      );
-      setState(() => _isBusy = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyimpan perubahan: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isBusy = false);
+      }
     }
   }
 
@@ -90,10 +115,84 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     await _saveSupportUpdate();
   }
 
+  Future<void> _openSupportActionsSheet() async {
+    final ticket = ref.read(appControllerProvider).getTicketById(widget.ticketId);
+    if (ticket == null) {
+      return;
+    }
+
+    _assignedController.text = ticket.assignedTo ?? _assignedController.text;
+    _selectedStatus ??= ticket.status;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) {
+        TicketStatus selected = _selectedStatus ?? ticket.status;
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 8,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Aksi Helpdesk/Admin', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<TicketStatus>(
+                    initialValue: selected,
+                    decoration: const InputDecoration(labelText: 'Update Status'),
+                    items: TicketStatus.values
+                        .map(
+                          (status) => DropdownMenuItem<TicketStatus>(
+                            value: status,
+                            child: Text(status.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setModalState(() => selected = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _assignedController,
+                    decoration: const InputDecoration(labelText: 'Assign Ticket Ke'),
+                  ),
+                  const SizedBox(height: 14),
+                  FilledButton.icon(
+                    onPressed: _isBusy
+                        ? null
+                        : () async {
+                            setState(() => _selectedStatus = selected);
+                            Navigator.pop(context);
+                            await _saveSupportUpdate();
+                          },
+                    icon: const Icon(Icons.save),
+                    label: const Text('Simpan Perubahan'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildStatusStep(
     BuildContext context,
     TicketStatus status,
     int currentStatusIndex,
+    bool isLast,
     bool canEdit,
     VoidCallback? onTap,
   ) {
@@ -102,38 +201,73 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     final isCurrent = statusIndex == currentStatusIndex;
     final colorScheme = Theme.of(context).colorScheme;
 
-    final backgroundColor = isCurrent
-        ? colorScheme.primaryContainer
-        : isDone
-            ? colorScheme.secondaryContainer
-            : colorScheme.surfaceContainerHighest;
-
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: Icon(
-          isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: isCurrent
-              ? colorScheme.primary
-              : isDone
-                  ? Colors.green
-                  : Colors.grey,
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: isCurrent ? colorScheme.primaryContainer.withValues(alpha: 0.35) : null,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isCurrent
+                ? colorScheme.primary.withValues(alpha: 0.6)
+                : colorScheme.outlineVariant,
+          ),
         ),
-        tileColor: backgroundColor,
-        title: Text(status.label),
-        subtitle: Text(
-          isCurrent
-              ? 'Status saat ini'
-              : canEdit
-                  ? 'Ketuk untuk mengubah status'
-                  : 'Tracking status',
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+              width: 26,
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+                    color: isCurrent
+                        ? colorScheme.primary
+                        : isDone
+                            ? Colors.green
+                            : Colors.grey,
+                    size: 20,
+                  ),
+                  if (!isLast)
+                    Container(
+                      margin: const EdgeInsets.only(top: 3),
+                      width: 2,
+                      height: 34,
+                      color: isDone
+                          ? Colors.green.withValues(alpha: 0.6)
+                          : colorScheme.outlineVariant,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 1),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(status.label, style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(
+                      isCurrent
+                          ? 'Status aktif saat ini'
+                          : canEdit
+                              ? 'Ketuk untuk ubah status'
+                              : 'Menunggu progres',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (canEdit) const Icon(Icons.chevron_right, size: 18),
+          ],
         ),
-        trailing: canEdit
-            ? const Icon(Icons.chevron_right)
-            : isCurrent
-                ? const Icon(Icons.flag, size: 18)
-                : null,
-        onTap: onTap,
       ),
     );
   }
@@ -155,19 +289,45 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          Text(ticket.title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Text(ticket.description),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              Chip(label: Text('Status: ${ticket.status.label}')),
-              Chip(label: Text('Reporter: ${ticket.userName}')),
-              Chip(label: Text('Assigned: ${ticket.assignedTo ?? '-'}')),
-            ],
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 450),
+            tween: Tween(begin: 0, end: 1),
+            builder: (context, value, child) => Opacity(
+              opacity: value,
+              child: Transform.translate(offset: Offset(0, (1 - value) * 10), child: child),
+            ),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(ticket.title, style: Theme.of(context).textTheme.headlineSmall),
+                    const SizedBox(height: 8),
+                    Text(ticket.description),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: <Widget>[
+                        Chip(label: Text('Status: ${ticket.status.label}')),
+                        Chip(label: Text('Reporter: ${ticket.userName}')),
+                        Chip(label: Text('Assigned: ${ticket.assignedTo ?? '-'}')),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
+          if (_isSupport(profile)) ...<Widget>[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _isBusy ? null : _openSupportActionsSheet,
+              icon: const Icon(Icons.admin_panel_settings),
+              label: const Text('Aksi Helpdesk/Admin'),
+            ),
+          ],
           if (ticket.imageUrl != null && ticket.imageUrl!.isNotEmpty) ...<Widget>[
             const SizedBox(height: 12),
             Card(
@@ -204,45 +364,17 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
             ),
           ],
           const SizedBox(height: 20),
-          if (_isSupport(profile)) ...<Widget>[
-            Text(
-              'Panel Helpdesk/Admin',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _assignedController,
-              decoration: const InputDecoration(labelText: 'Assign Ticket Ke'),
-            ),
-            const SizedBox(height: 10),
-            DropdownButtonFormField<TicketStatus>(
-              initialValue: _selectedStatus ?? ticket.status,
-              decoration: const InputDecoration(labelText: 'Update Status'),
-              items: TicketStatus.values
-                  .map(
-                    (status) => DropdownMenuItem<TicketStatus>(
-                      value: status,
-                      child: Text(status.label),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) => setState(() => _selectedStatus = value),
-            ),
-            const SizedBox(height: 10),
-            FilledButton(
-              onPressed: _isBusy ? null : _saveSupportUpdate,
-              child: const Text('Simpan Perubahan'),
-            ),
-            const SizedBox(height: 20),
-          ],
           Text('Tracking Status', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          ...TicketStatus.values.map((status) {
+          ...TicketStatus.values.asMap().entries.map((entry) {
+            final index = entry.key;
+            final status = entry.value;
             final canEdit = _isSupport(profile);
             return _buildStatusStep(
               context,
               status,
               currentStatusIndex,
+              index == TicketStatus.values.length - 1,
               canEdit,
               canEdit ? () => _setStatus(status) : null,
             );
@@ -256,7 +388,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.timeline),
                     title: Text(trace.message),
-                    subtitle: Text('${trace.actorName} • ${trace.createdAt}'),
+                    subtitle: Text('${trace.actorName} • ${_formatDate(trace.createdAt)}'),
                   ),
                 ),
               )
@@ -266,11 +398,12 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
           const SizedBox(height: 8),
           ...ticket.comments
               .map(
-                (comment) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(comment.message),
-                  subtitle: Text(
-                    '${comment.authorName} (${comment.authorRole.value}) • ${comment.createdAt}',
+                (comment) => Card(
+                  child: ListTile(
+                    title: Text(comment.message),
+                    subtitle: Text(
+                      '${comment.authorName} (${comment.authorRole.value}) • ${_formatDate(comment.createdAt)}',
+                    ),
                   ),
                 ),
               )

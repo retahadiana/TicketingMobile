@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_controller.dart';
 import '../../../core/permissions.dart';
+import '../../../models/profile_model.dart';
 import '../../../models/ticket_model.dart';
 import 'create_ticket_screen.dart';
 import 'history_screen.dart';
@@ -25,10 +26,33 @@ class DashboardScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: <Widget>[
-        Text(
-          'Ringkasan Tiket',
-          style: Theme.of(context).textTheme.titleLarge,
+        Card(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: <Color>[
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                  Theme.of(context).colorScheme.secondary.withValues(alpha: 0.12),
+                ],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Halo, ${user.fullName}', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 6),
+                Text('Role aktif: ${user.role.value}'),
+                const SizedBox(height: 2),
+                Text('Pantau ringkasan performa tiket helpdesk Anda hari ini.'),
+              ],
+            ),
+          ),
         ),
+        const SizedBox(height: 14),
+        Text('Ringkasan Tiket', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 10),
         _StatsGrid(stats: stats, total: tickets.length),
         const SizedBox(height: 16),
@@ -75,10 +99,8 @@ class DashboardScreen extends ConsumerWidget {
         else
           ...tickets.take(5).map(
                 (ticket) => Card(
-                  child: ListTile(
-                    title: Text(ticket.title),
-                    subtitle: Text('${ticket.status.label} • ${ticket.userName}'),
-                    trailing: const Icon(Icons.chevron_right),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -87,6 +109,34 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       );
                     },
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.confirmation_number),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(ticket.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height: 4),
+                                Text('${ticket.status.label} • ${ticket.userName}'),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
