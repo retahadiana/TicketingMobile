@@ -14,6 +14,21 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isSending = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Clear any previous errors when entering reset password screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(appControllerProvider).clearError();
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
   Future<void> _sendResetEmail() async {
     if (_emailController.text.trim().isEmpty) return;
 

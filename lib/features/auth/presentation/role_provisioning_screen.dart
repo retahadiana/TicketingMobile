@@ -106,7 +106,7 @@ class _RoleProvisioningScreenState extends ConsumerState<RoleProvisioningScreen>
                     ),
                   );
                 },
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemCount: users.length,
               ),
       ),

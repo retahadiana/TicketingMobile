@@ -107,13 +107,21 @@ class AppController extends ChangeNotifier {
       return;
     }
 
-    await _withLoading(() async {
-      final profile = await _profileService.getCurrentProfile();
-      _currentUser = profile;
-      if (profile != null) {
-        await refreshData();
-      }
-    });
+    try {
+      await _withLoading(() async {
+        final profile = await _profileService.getCurrentProfile();
+        _currentUser = profile;
+        if (profile != null) {
+          await refreshData();
+        }
+      }, silentLoading: true);
+      // Clear error if bootstrap was successful
+      _lastError = null;
+      notifyListeners();
+    } catch (error) {
+      _lastError = error.toString();
+      notifyListeners();
+    }
   }
 
   Future<void> login({required String email, required String password}) async {
@@ -291,6 +299,11 @@ class AppController extends ChangeNotifier {
       throw Exception('Silakan login terlebih dahulu.');
     }
     return profile;
+  }
+
+  void clearError() {
+    _lastError = null;
+    notifyListeners();
   }
 
   Future<void> _withLoading(

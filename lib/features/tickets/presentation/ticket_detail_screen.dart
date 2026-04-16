@@ -46,6 +46,13 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _assignedController.dispose();
+    _commentController.dispose();
+    super.dispose();
+  }
+
   Future<void> _submitComment() async {
     final message = _commentController.text.trim();
     if (message.isEmpty) {

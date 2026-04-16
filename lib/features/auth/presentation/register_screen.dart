@@ -18,6 +18,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   UserRole _selectedRole = UserRole.user;
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Clear any previous errors when entering register screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(appControllerProvider).clearError();
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
+
   String _mapRegisterError(Object error) {
     final raw = error.toString().toLowerCase();
     if (raw.contains('over_email_send_rate_limit') ||

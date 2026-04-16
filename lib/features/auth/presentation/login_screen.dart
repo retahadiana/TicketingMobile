@@ -15,6 +15,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Clear any previous errors when entering login screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(appControllerProvider).clearError();
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleLogin() async {
     setState(() => _isLoading = true);
 

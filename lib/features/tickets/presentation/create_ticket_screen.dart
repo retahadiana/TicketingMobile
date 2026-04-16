@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,14 +19,52 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   Uint8List? _imageBytes;
   bool _isLoading = false;
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  void _showPermissionSnackBar(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
-    if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
-      setState(() {
-        _image = pickedFile;
-        _imageBytes = bytes;
-      });
+    try {
+      final pickedFile = await ImagePicker().pickImage(source: source);
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        if (!mounted) return;
+        setState(() {
+          _image = pickedFile;
+          _imageBytes = bytes;
+        });
+      }
+    } on PlatformException catch (e) {
+      final isPermissionIssue =
+          e.code.contains('access_denied') ||
+          e.code.contains('permission') ||
+          e.code.contains('camera');
+
+      if (isPermissionIssue) {
+        _showPermissionSnackBar(
+          source == ImageSource.camera
+              ? 'Izin kamera ditolak. Aktifkan izin kamera di pengaturan aplikasi.'
+              : 'Izin galeri ditolak. Aktifkan izin foto/galeri di pengaturan aplikasi.',
+        );
+        return;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memilih gambar: ${e.message ?? e.code}')),
+        );
+      }
     }
   }
 

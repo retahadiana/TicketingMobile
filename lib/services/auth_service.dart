@@ -19,12 +19,16 @@ class AuthService {
       data: {'full_name': name, 'role': role},
     );
 
-    final signedUpUser = response.user;
-    if (signedUpUser != null) {
+    final signedUpUser = response.user;                                                                               
+    // When email confirmation is enabled, Supabase may return user without session.
+    // In that case, inserting into profiles from client-side will fail RLS (Unauthorized).
+    final hasSession = response.session != null;
+    if (signedUpUser != null && hasSession) {
       await _supabase.from('profiles').upsert({
         'id': signedUpUser.id,
         'full_name': name,
         'role': role,
+        'email': email,
       });
     }
 
