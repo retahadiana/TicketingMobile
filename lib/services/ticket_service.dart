@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../core/permissions.dart';
 import '../models/profile_model.dart';
 import '../models/ticket_model.dart';
