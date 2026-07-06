@@ -69,7 +69,7 @@ class SettingsScreen extends ConsumerWidget {
               child: ListTile(
                 leading: Icon(Icons.info_outline, color: fg.withValues(alpha: 0.7)),
                 title: Text('Tentang Aplikasi', style: TextStyle(color: fg)),
-                subtitle: Text('E-Ticketing Helpdesk v1.0.0\nProyek UTS Mobile',
+                subtitle: Text('E-Ticketing Helpdesk v2.0.0\nProyek UAS Mobile',
                     style: TextStyle(color: fgSub)),
               ),
             ),

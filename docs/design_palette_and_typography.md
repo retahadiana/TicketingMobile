@@ -1,87 +1,102 @@
-# Design Palette and Typography Notes
+# Dokumentasi Desain: Warna dan Tipografi (Terbaru)
 
-warna dan tipografi yang saat ini dipakai pada aplikasi Ticketing Helpdesk Flutter.
+Dokumentasi ini berisi rincian sistem desain, palet warna, tipografi, serta komponen visual utama yang saat ini digunakan pada aplikasi **Ticketing Helpdesk (Anti-Gravity)**.
 
-## 1) Typography
+---
 
-### Primary font family
-- **Plus Jakarta Sans** (global text theme)
-- Sumber:
-  - `GoogleFonts.plusJakartaSansTextTheme(base.textTheme)`
-  - `GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)` untuk label NavigationBar
+## 1. Tipografi (Typography)
 
-### Font weight yang terlihat dipakai
-- 400 (default body)
-- 600 (label/navigation/meta)
-- 700 (heading/emphasis)
+Aplikasi menggunakan paket Google Fonts sebagai dasar tipografinya.
 
-### Catatan konsistensi
-- Tidak ditemukan font family lain di folder `lib/`.
-- Seluruh tampilan mengikuti tema global dan override lokal seperlunya.
+*   **Primary Font Family**: **Poppins**
+    *   *Sumber*:
+        *   `GoogleFonts.poppinsTextTheme(...)` sebagai tema teks dasar.
+        *   `GoogleFonts.poppins(...)` untuk penyesuaian khusus (seperti AppBar title, buttons, dll).
+*   **Font Weights yang Digunakan**:
+    *   `FontWeight.w400` (Regular) - Digunakan untuk teks deskripsi, isi body, dan petunjuk form (*hint*).
+    *   `FontWeight.w500` (Medium) - Digunakan untuk teks dropdown, tombol navigasi tidak aktif, dll.
+    *   `FontWeight.w600` (Semi-Bold) - Digunakan untuk sub-header, teks tombol utama, judul kartu, dan AppBar.
+    *   `FontWeight.w700` (Bold) - Digunakan untuk judul utama (*Welcome Screen*, judul *Dashboard*, dll).
 
-## 2) Core Color Tokens
+---
 
-### Brand tokens (light-first)
-- `brand`: **#0F766E**
-- `brandDark`: **#134E4A**
-- `accent`: **#EA580C**
+## 2. Token Warna Inti (Core Color Tokens)
 
-### Light surface/background
-- `surface`: **#F4F7F8**
-- `scaffoldBackgroundColor`: **#F4F7F8**
-- Input fill light: **#FFFFFF**
+Palet warna utama didefinisikan secara statis dalam kelas `AGColors` dan `AppTheme`:
 
-### Dark mode tokens
-- `primary` dark: **#2DD4BF**
-- `secondary` dark: **#FB923C**
-- Input fill dark: **#0F172A**
+| Token | Warna (HEX) | Deskripsi |
+| :--- | :--- | :--- |
+| `deepNavy` | **#192A56** | Warna navy gelap dasar untuk tema gelap & teks utama mode terang |
+| `charcoal` | **#2D3436** | Warna abu-abu gelap untuk transisi latar belakang gelap |
+| `softPurple` | **#6C5CE7** | Warna ungu utama (brand primary) untuk elemen interaktif di mode terang |
+| `accentBlue` | **#74B9FF** | Warna biru sekunder untuk highlight dan penanda |
+| `accentCyan` | **#00CEC9** | Warna cyan terang (brand primary) untuk elemen interaktif di mode gelap |
 
-## 3) Ticket Status Palette
+---
 
-Status warna yang dipakai pada daftar tiket/dashboard:
-- **Open**: #0F766E
-- **In Progress**: #EA580C (dan variasi #CA6702 pada kartu statistik)
-- **Resolved**: #16A34A (dan variasi #0A9396 pada kartu statistik)
-- **Closed**: outline theme (dan #6C757D pada kartu statistik)
+## 3. Sistem Glassmorphism
 
-## 4) Gradient and Hero Usage
+Aplikasi menggunakan kartu transparan dengan efek buram (*backdrop blur*) yang beradaptasi secara dinamis sesuai mode kecerahan layar.
 
-### Splash gradient
-- **#005F73 -> #0A9396 -> #94D2BD**
+### Mode Gelap (Dark Mode Glass)
+*   **Latar Belakang (`glassFill`)**: `#FFFFFF` dengan opasitas 8% (`Color(0x14FFFFFF)`)
+*   **Batas/Border (`glassBorder`)**: `#FFFFFF` dengan opasitas 15% (`Color(0x26FFFFFF)`)
+*   **Highlight (`glassHighlight`)**: `#FFFFFF` dengan opasitas 5% (`Color(0x0DFFFFFF)`)
+*   **Backdrop Blur**: `sigmaX: 12`, `sigmaY: 12`
 
-### Login hero gradient
-- `colorScheme.primary` -> `colorScheme.primary` dengan alpha 0.75
+### Mode Terang (Light Mode Glass)
+*   **Latar Belakang (`lightGlassFill`)**: `#FFFFFF` dengan opasitas 55% (`Color(0x8CFFFFFF)`)
+*   **Batas/Border (`lightGlassBorder`)**: `#FFFFFF` dengan opasitas 70% (`Color(0xB3FFFFFF)`)
+*   **Backdrop Blur**: `sigmaX: 12`, `sigmaY: 12`
 
-## 5) Semantic Material Colors in Use
+---
 
-Aplikasi sudah memanfaatkan semantic colors dari Material 3:
-- `primaryContainer` / `onPrimaryContainer`
-- `secondaryContainer`
-- `errorContainer` / `onErrorContainer`
-- `outline` / `outlineVariant`
-- `surfaceContainerHighest`
+## 4. Gradien Latar Belakang (Gradient Backgrounds)
 
-Ini bagus untuk menjaga kompatibilitas light/dark mode dan aksesibilitas kontras.
+Seluruh halaman dibalut menggunakan `GradientScaffold` yang merender gradien halus:
 
-## 6) Neutrals and Utility Colors
+*   **Gradien Mode Gelap**:
+    *   Warna: `AGColors.deepNavy` (#192A56) -> `AGColors.charcoal` (#2D3436) -> Dark Purple (#1E1545) -> `AGColors.softPurple` (#6C5CE7)
+    *   Posisi Transisi (*Stops*): `[0.0, 0.35, 0.7, 1.0]`
+*   **Gradien Mode Terang**:
+    *   Warna: Soft Lavender (#E8DFFF) -> Sky Blue (#D6EAFF) -> Pastel Purple (#E0D4FF) -> Light Cyan (#C8E6FF)
+    *   Posisi Transisi (*Stops*): `[0.0, 0.35, 0.7, 1.0]`
 
-Warna netral/utility yang dipakai di beberapa komponen:
-- White: **#FFFFFF** (`Colors.white`)
-- White 70: `Colors.white70`
-- Black transparan untuk border light: `Colors.black` alpha 0.05/0.1
-- White transparan untuk border dark: `Colors.white` alpha 0.08/0.15
-- Green/Grey utility pada timeline detail tiket: `Colors.green`, `Colors.grey`
+---
 
-## 7) Source of Truth (Files)
+## 5. Palet Warna Status Tiket (Ticket Status Palette)
 
-- `lib/core/theme/app_theme.dart` (token utama tema + font global)
-- `lib/features/auth/presentation/splash_screen.dart` (gradient splash)
-- `lib/features/auth/presentation/login_screen.dart` (gradient login + error container)
-- `lib/features/tickets/presentation/ticket_list_screen.dart` (status chip colors)
-- `lib/features/tickets/presentation/dashboard_screen.dart` (warna statistik dashboard)
+Warna representatif untuk status pelaporan tiket:
+*   **Open**: `#0F766E` (Cyan Gelap)
+*   **In Progress**: `#EA580C` (Oranye) / `#CA6702` (Statistik)
+*   **Resolved**: `#16A34A` (Hijau) / `#0A9396` (Statistik)
+*   **Closed**: `#6C757D` (Abu-abu)
 
-## 8) Rekomendasi Ringkas
+---
 
-- Pertahankan `app_theme.dart` sebagai sumber utama token.
-- Jika ingin rapikan lebih lanjut, pindahkan warna status dashboard hardcoded ke konstanta tunggal (misal `TicketStatusColors`) agar konsisten lintas layar.
-- Hindari menambah hardcoded color baru tanpa token agar maintainability tetap baik.
+## 6. Desain Custom Navbar (Animated Glass Navigation Bar)
+
+Navbar menggunakan desain kustom melayang dengan indikator lingkaran menonjol (*mockup-inspired*):
+
+*   **Bentuk & Layout**: Baris rata bawah dengan kelengkungan sudut atas sebesar 30 (`borderRadius: only(topLeft, topRight: 30)`).
+*   **Warna Latar Belakang Navbar (`navBgColor`)**:
+    *   Mode Terang: Opaque White (`Colors.white`)
+    *   Mode Gelap: Dark Slate Purple (`#1E1E2C`)
+*   **Warna Elemen Aktif (`activeColor`)**:
+    *   Mode Terang: `AGColors.softPurple` (#6C5CE7)
+    *   Mode Gelap: `AGColors.accentCyan` (#00CEC9)
+*   **Warna Elemen Tidak Aktif (`inactiveColor`)**:
+    *   Mode Terang: `AGColors.deepNavy` dengan opasitas 50%
+    *   Mode Gelap: Putih transparan dengan opasitas 54% (`Colors.white54`)
+*   **Efek Interaktif**:
+    *   Lingkaran indikator tab aktif berdiameter 52 melayang keluar di bagian atas navbar dengan pergeseran animasi pegas `Curves.easeOutBack`.
+    *   Ikon di dalam lingkaran melayang berubah menggunakan transisi skala (`AnimatedSwitcher` + `ScaleTransition`).
+    *   Ikon menu yang aktif disembunyikan dari baris dasar menu utama (hanya menyisakan label teks di bawah lingkaran indikator).
+
+---
+
+## 7. Sumber Rujukan Utama di Codebase (Source of Truth)
+
+*   [app_theme.dart](file:///d:/434241107_Reta-Hadiana-Unggula_B3-Aplikasi-Mobile_UTS-main/lib/core/theme/app_theme.dart) - Konfigurasi global ThemeData, tipografi Poppins, dan form style.
+*   [glassmorphism.dart](file:///d:/434241107_Reta-Hadiana-Unggula_B3-Aplikasi-Mobile_UTS-main/lib/core/theme/glassmorphism.dart) - Nilai dasar hex `AGColors`, widget GradientScaffold, GlassCard, dan TicketCard.
+*   [home_shell_screen.dart](file:///d:/434241107_Reta-Hadiana-Unggula_B3-Aplikasi-Mobile_UTS-main/lib/features/home/presentation/home_shell_screen.dart) - Implementasi `AnimatedGlassNavigationBar` beserta warna & dimensi layout navbar terbaru.

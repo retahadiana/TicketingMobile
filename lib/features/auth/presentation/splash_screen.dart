@@ -46,14 +46,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            ClipOval(
+              child: Image.asset(
+                'assets/icon/tiket_gambar_6.png',
+                width: 112,
+                height: 112,
+                fit: BoxFit.cover,
               ),
-              child: const Icon(Icons.support_agent, color: Colors.white, size: 64),
             ),
             const SizedBox(height: 28),
             const Text(

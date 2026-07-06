@@ -74,13 +74,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AGColors.accentCyan.withValues(alpha: 0.15),
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/icon/tiket_gambar_6.png',
+                      width: 58,
+                      height: 58,
+                      fit: BoxFit.cover,
                     ),
-                    child: const Icon(Icons.support_agent, color: AGColors.accentCyan, size: 34),
                   ),
                   const SizedBox(height: 16),
                   Text(
